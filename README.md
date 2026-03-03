@@ -1,66 +1,46 @@
-# Gold Price Forecasting — Indian Jewellery Market
+---
+title: Gold Forecast India
+emoji: 🥇
+colorFrom: yellow
+colorTo: orange
+sdk: gradio
+sdk_version: "4.20.0"
+app_file: app.py
+pinned: false
+license: mit
+short_description: AI-driven gold price forecasting for Indian jewellery retailers
+---
 
-Production-grade ML system delivering 1/2/3/7-day gold price forecasts for Indian physical jewellery retailers.
+# Gold Price Forecast — Indian Jewellery Market
+
+Production-grade ML system for Indian physical gold retailers.
+
+**Stack**: XGBoost | 2-state HMM | GARCH(1,1) | Dynamic VaR Decision Engine
+
+**Horizons**: 1d / 2d / 3d / 7d (direct models)
+
+**Signal outputs**: BUY NOW | STOCK UP | HOLD | WAIT | LIQUIDATE PARTIAL
+
+## How to Use
+
+1. Click **Run Forecast**
+2. Wait ~60-90s for first run (data fetch + model train on CPU)
+3. View signal, VaR, confidence band, and per-horizon forecast table
 
 ## Architecture
-- **Target**: MCX log return → ₹/10g
-- **Regime**: 2-state HMM (LOW/HIGH volatility)
-- **Models**: 8 XGBoost (4 horizons × 2 regimes)
-- **Decision Engine**: BUY / WAIT / STOCK UP / LIQUIDATE / HOLD
-
-## Setup
-
-```bash
-git clone <repo>
-cd Gold_project
-pip install -r requirements.txt
-cp .env.example .env  # add FRED_API_KEY
-```
-
-## Run Pipeline
-
-```bash
-# 1. Ingest data
-python data/ingest.py
-
-# 2. Build features + regime labels
-python features/engineer.py
-python regime/hmm_model.py
-
-# 3. Train models
-python train/trainer.py
-
-# 4. Validate
-python validate/backtest.py
-
-# 5. Run local inference
-python inference/predictor.py
-
-# 6. Launch dashboard
-streamlit run deploy/app.py
-```
-
-## Environment Variables
-
-```env
-FRED_API_KEY=your_fred_api_key_here
-```
-
-Get FRED key free at: https://fred.stlouisfed.org/docs/api/api_key.html
-
-## Deployment
-Hosted on HuggingFace Spaces (Streamlit, CPU-only).
-
-## Folder Structure
 
 ```
-data/          ← ingestion + preprocessing
-features/      ← feature engineering + seasonal
-regime/        ← HMM + GARCH
-train/         ← XGBoost training + Optuna tuning
-inference/     ← predictor + decision engine
-deploy/        ← Streamlit app
-validate/      ← backtest
-utils/         ← metrics + logger
-models/        ← artifacts + registry
+Live Data (yfinance + FRED)
+    -> Log Return Computation
+    -> Feature Engineering (lags, rolling, seasonal)
+    -> HMM Regime Detection (LOW/HIGH volatility)
+    -> GARCH Conditional Variance Feature
+    -> XGBoost Inference (regime-conditioned)
+    -> Dynamic Threshold (Sharpe + VaR + regime)
+    -> Signal: BUY NOW / WAIT / STOCK UP / LIQUIDATE / HOLD
 ```
+
+## Disclaimer
+
+This is a decision-support tool only. Do not base procurement decisions solely on AI signals.
+Combine with your inventory levels, cash flow, and market knowledge.
