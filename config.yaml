@@ -1,0 +1,85 @@
+# ============================================================
+# Gold Forecasting System — Global Configuration
+# ============================================================
+
+# --- Data Sources ---
+data:
+  gold_ticker: "GC=F"            # Yahoo Finance: Gold Futures (proxy for MCX)
+  usdinr_ticker: "USDINR=X"     # USD/INR exchange rate
+  dxy_ticker: "DX-Y.NYB"        # US Dollar Index
+  crude_ticker: "CL=F"           # Crude Oil Futures
+  fred_10y_series: "DGS10"       # 10-Year Treasury Yield
+  fred_cpi_series: "CPIAUCSL"    # CPI
+  fred_api_key: ""               # Set via environment: FRED_API_KEY
+  start_date: "2018-01-01"
+  end_date: "auto"               # auto = today
+
+# --- Feature Engineering ---
+features:
+  lags: [1, 2, 3, 7, 14]
+  rolling_windows: [7, 14, 30]
+  vol_cluster_threshold_percentile: 75
+
+# --- HMM Regime Detection ---
+hmm:
+  n_states: 2
+  n_iter: 1000
+  covariance_type: "full"
+  random_state: 42
+  high_regime_label: 1
+  fallback_vol_percentile: 75    # if HMM unstable, use rolling std threshold
+
+# --- GARCH ---
+garch:
+  p: 1
+  q: 1
+
+# --- Model Training ---
+training:
+  horizons: [1, 2, 3, 7]
+  regimes: [0, 1]               # 0 = LOW, 1 = HIGH
+  n_splits: 5                    # TimeSeriesSplit folds
+  xgb_base_params:
+    objective: "reg:squarederror"
+    tree_method: "hist"
+    random_state: 42
+    n_estimators: 300
+    learning_rate: 0.05
+    max_depth: 4
+    subsample: 0.8
+    colsample_bytree: 0.8
+    reg_lambda: 1.0
+  optuna_trials: 30
+  early_stopping_rounds: 30
+
+# --- Decision Engine ---
+decision:
+  base_threshold: 0.60
+  threshold_min: 0.55
+  threshold_max: 0.80
+  var_block_threshold_inr: -1000  # ₹ — block BUY if VaR worse than this
+  sharpe_lookback_days: 14
+  var_lookback_days: 14
+  stock_up_min_return: 0.015      # +1.5% 7d expected to trigger STOCK UP
+
+# --- Conversion ---
+conversion:
+  mcx_grams_per_unit: 10          # MCX quoted per 10g
+  # Approximate scaling: USD/oz → ₹/10g
+  # Formula: USD_oz * usdinr * import_factor / 31.1 * 10
+  import_factor: 1.125            # ~12.5% effective import duty + GST
+
+# --- Deployment ---
+deploy:
+  platform: "HuggingFace Spaces"
+  framework: "streamlit"
+  cpu_only: true
+
+# --- Paths ---
+paths:
+  raw_data: "data/raw/"
+  processed_data: "data/processed/"
+  model_artifacts: "models/artifacts/"
+  model_registry: "models/registry/registry.json"
+  threshold_config: "models/registry/threshold.json"
+  logs: "logs/"

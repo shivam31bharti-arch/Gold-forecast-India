@@ -1,0 +1,18 @@
+# Inference-only requirements for HuggingFace Spaces deployment
+# Training deps (xgboost training, hmmlearn fit, arch fit) are pre-run locally
+# This file is used by HF Spaces to build the CPU inference container
+
+pandas>=2.0.0
+numpy>=1.26.0
+xgboost>=2.0.0
+hmmlearn>=0.3.0
+arch>=6.3.0
+scikit-learn>=1.4.0
+yfinance>=0.2.36
+pyyaml>=6.0
+joblib>=1.3.0
+python-dotenv>=1.0.0
+streamlit>=1.31.0
+plotly>=5.18.0
+fredapi>=0.5.1
+shap>=0.44.0
