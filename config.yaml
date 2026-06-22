@@ -72,7 +72,7 @@ conversion:
 # --- Deployment ---
 deploy:
   platform: "HuggingFace Spaces"
-  framework: "streamlit"
+  framework: "gradio"
   cpu_only: true
 
 # --- Paths ---
